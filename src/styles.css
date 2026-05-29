@@ -1,3 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+  /* Couleurs de l'application */
+  --color-accent-1: #F9CBCB;
+  --color-accent-2: #FE0000;
+  --color-surface: #F6F5F5;
+  --color-alert-disabled: #DB1F12;
+  --color-success: #DEF7EC;
+  /* Basiques */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+}
+
+.card {
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}

@@ -1,0 +1,11 @@
+<app-dashboard-card [subtitle]="'Évolution du Catalogue'" [title]="'Croissance mensuelle'">
+  <div class="line-chart">
+    <div *ngFor="let item of data" class="line-chart-item">
+      <span class="line-value text-sm font-semibold text-gray-900">{{ item.value }}</span>
+      <div class="line-column">
+        <div class="line-point" [style.height.%]="item.height"></div>
+      </div>
+      <span class="text-xs text-gray-500">{{ item.label }}</span>
+    </div>
+  </div>
+</app-dashboard-card>

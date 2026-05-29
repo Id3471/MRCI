@@ -1,0 +1,42 @@
+<app-dashboard-card [subtitle]="'Répartition par Commune'" [title]="'Cartographie géographique'">
+  <div class="grid gap-4 xl:grid-cols-[1fr_0.75fr] lg:grid-cols-1">
+    <div class="flex items-center justify-center">
+      <div class="donut-chart">
+        <div class="donut-ring" [ngStyle]="{ background: donutBackground }"></div>
+        <div
+          *ngFor="let segment of segments; let i = index"
+          class="donut-segment"
+          [ngStyle]="{ transform: 'rotate(' + segment.startAngle + 'deg)', backgroundColor: segment.color }"
+          (mouseenter)="setHoveredIndex(i)"
+          (mouseleave)="clearHoveredIndex()"
+          aria-hidden="true"
+        ></div>
+        <div class="donut-center">
+          <span class="text-sm font-semibold text-gray-900">{{ hoveredCommuneLabel }}</span>
+          <span class="text-xs text-gray-500" *ngIf="hoveredCommuneCount !== null">
+            {{ hoveredCommuneCount }} appartements
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="space-y-3">
+      <div
+        *ngFor="let item of data; let i = index"
+        class="flex cursor-pointer items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 transition hover:bg-slate-100"
+        [class.border-slate-300]="hoveredIndex === i"
+        [class.border]="hoveredIndex === i"
+        (mouseenter)="setHoveredIndex(i)"
+        (mouseleave)="clearHoveredIndex()"
+      >
+        <div class="flex items-center gap-3">
+          <span class="legend-dot" [style.backgroundColor]="colors[i % colors.length]"></span>
+          <div>
+            <p class="font-medium text-gray-900">{{ item.commune }}</p>
+            <p class="text-sm text-gray-500">{{ item.count }} appartements</p>
+          </div>
+        </div>
+        <span class="text-sm font-semibold text-gray-900">{{ item.percent }}%</span>
+      </div>
+    </div>
+  </div>
+</app-dashboard-card>

@@ -1,0 +1,28 @@
+<app-dashboard-card [subtitle]="'Derniers Appartements Ajoutés'" [title]="'Suivi opérationnel'">
+  <div class="overflow-hidden rounded-3xl border border-gray-200 mt-4">
+    <table class="min-w-full text-left text-sm">
+      <thead class="bg-slate-100 text-xs uppercase tracking-[0.2em] text-gray-500">
+        <tr>
+          <th class="px-4 py-3">Type</th>
+          <th class="px-4 py-3">Résidence</th>
+          <th class="px-4 py-3">Quartier</th>
+          <th class="px-4 py-3">Prix</th>
+          <th class="px-4 py-3">Statut</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 bg-white">
+        <tr *ngFor="let apartment of data">
+          <td class="px-4 py-4 font-medium text-gray-900">{{ apartment.type }}</td>
+          <td class="px-4 py-4 text-gray-600">{{ apartment.residence }}</td>
+          <td class="px-4 py-4 text-gray-600">{{ apartment.quartier }}</td>
+          <td class="px-4 py-4 text-gray-900">{{ apartment.price | number:'1.0-0' }} FCFA</td>
+          <td class="px-4 py-4">
+            <span class="status-pill" [class.status-active]="apartment.status === 'Actif'" [class.status-inactive]="apartment.status !== 'Actif'">
+              {{ apartment.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</app-dashboard-card>

@@ -1,0 +1,33 @@
+<div class="dashboard-page px-6 py-6 space-y-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-sm uppercase tracking-[0.18em] text-gray-500">Tableau de bord</p>
+            <h1 class="text-3xl font-semibold text-gray-900">Indicatateurs de Ma Résidence CI</h1>
+        </div>
+    </div>
+
+    <section class="grid gap-4 xl:grid-cols-4 lg:grid-cols-2">
+        <app-dashboard-stat-card [subtitle]="'Total des Résidences'" [value]="totalResidences" [badges]="[
+            { label: 'Actives ' + activeResidencesCount, variant: 'success' },
+            { label: 'Inactives ' + inactiveResidencesCount, variant: 'danger' }
+        ]"></app-dashboard-stat-card>
+
+        <app-dashboard-stat-card [subtitle]="'Parc Immobilier'" [value]="apartmentsCount" [helperText]="'Appartements enregistrés'"></app-dashboard-stat-card>
+
+        <app-dashboard-stat-card [subtitle]="'Prix Moyen'" [value]="averagePriceActive" [suffix]="' FCFA'" [helperText]="'Prix moyen des appartements actifs'"></app-dashboard-stat-card>
+
+        <app-dashboard-stat-card [subtitle]="'Nouvelles Inscriptions'" [value]="newRegistrationsCount" [helperText]="'Ajouts de ce mois'"></app-dashboard-stat-card>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-3 lg:grid-cols-2">
+        <app-dashboard-commune-chart [data]="communeDistribution" class="xl:col-span-2"></app-dashboard-commune-chart>
+        <app-dashboard-typology-chart [data]="typologyStats"></app-dashboard-typology-chart>
+        <app-dashboard-evolution-chart [data]="catalogEvolution" class="xl:col-span-2"></app-dashboard-evolution-chart>
+        <app-dashboard-amenities-list [data]="topAmenities"></app-dashboard-amenities-list>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
+        <app-dashboard-apartments-table [data]="lastApartmentsAdded | slice:0:5"></app-dashboard-apartments-table>
+        <app-dashboard-inactive-residences [data]="inactiveResidences"></app-dashboard-inactive-residences>
+    </section>
+</div>

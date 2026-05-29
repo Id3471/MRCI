@@ -1,0 +1,97 @@
+<aside
+    class="fixed top-16 left-0 z-50 h-[calc(100vh-4rem)] border-r border-gray-200 bg-[#F6F5F5] transition-all duration-300"
+    [class.w-72]="!sidebar.collapsed()" [class.w-20]="sidebar.collapsed()">
+
+    <div class="flex h-full flex-col p-2">
+
+        <div class="mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                @if (!sidebar.collapsed()) {
+                <div class="w-100" (click)="toggleSidebar()">
+                    <p class="truncate text-sm font-semibold text-gray-900">Menu</p>
+                    <p class="truncate text-xs text-gray-500">Navigation</p>
+                </div>
+                }
+            </div>
+
+            <button type="button" (click)="toggleSidebar()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100">
+                @if (sidebar.collapsed()) { <span>›</span> } @else { <span>x</span> }
+            </button>
+        </div>
+
+        <nav class="flex-1 overflow-hidden flex flex-col justify-between">
+            <ul class="space-y-1">
+
+                @for (item of items; track trackByLabel($index, item)) {
+                <li>
+
+                    @if (!item.children) {
+                    <a [routerLink]="item.route"
+                        routerLinkActive="bg-[var(--color-accent-1)] text-[var(--color-accent-2)]"
+                        #rla="routerLinkActive"
+                        class="group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-[var(--color-accent-1)] hover:text-[var(--color-accent-2)]"
+                        [class.justify-center]="sidebar.collapsed()">
+
+                        <span
+                            class="material-icons h-5 w-5 shrink-0 text-xl leading-none transition-colors group-hover:text-[var(--color-accent-2)]">
+                            {{ item.icon }}
+                        </span>
+
+                        @if (!sidebar.collapsed()) {
+                        <span class="truncate">{{ item.label }}</span>
+                        }
+                    </a>
+                    }
+
+                    @if (item.children) {
+                    <button type="button" (click)="toggleGroup(item)"
+                        class="group flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-[var(--color-accent-1)] hover:text-[var(--color-accent-2)]"
+                        [class.justify-center]="sidebar.collapsed()">
+
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-icons text-xl transition-colors group-hover:text-[var(--color-accent-2)]"
+                                [class.text-[var(--color-accent-2)]]="isGroupActive(item)">
+                                {{ item.icon }}
+                            </span>
+
+                            @if (!sidebar.collapsed()) {
+                            <span class="truncate">{{ item.label }}</span>
+                            }
+                        </div>
+
+                        @if (!sidebar.collapsed()) {
+                        <span
+                            class="material-icons text-lg transition-transform duration-200 group-hover:text-[var(--color-accent-2)]"
+                            [class.rotate-180]="item.expanded">
+                            expand_more
+                        </span>
+                        }
+                    </button>
+
+                    @if (!sidebar.collapsed() && item.expanded) {
+                    <ul class="mt-0.5 space-y-0.5 pl-9">
+                        @for (child of item.children; track trackByLabel($index, child)) {
+                        <li>
+                            <a [routerLink]="child.route" routerLinkActive="sidebar-active"
+                                class="group flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-900 transition hover:bg-[var(--color-accent-1)] hover:text-[var(--color-accent-2)]">
+                                <span
+                                    class="material-icons text-sm transition-colors group-hover:text-[var(--color-accent-2)]">
+                                    {{ child.icon }}
+                                </span>
+                                <span class="truncate">{{ child.label }}</span>
+                            </a>
+                        </li>
+                        }
+                    </ul>
+                    }
+                    }
+
+                </li>
+                }
+
+            </ul>
+        </nav>
+    </div>
+</aside>

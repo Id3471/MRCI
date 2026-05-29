@@ -1,0 +1,18 @@
+<article class="card">
+  
+  @if (subtitle || title) {
+    <div class="mb-4">
+      
+      @if (subtitle) {
+        <p class="text-sm text-gray-500">{{ subtitle }}</p>
+      }
+      
+      @if (title) {
+        <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+      }
+
+    </div>
+  }
+
+  <ng-content></ng-content>
+</article>

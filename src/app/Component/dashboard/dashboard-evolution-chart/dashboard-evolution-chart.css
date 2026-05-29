@@ -1,0 +1,49 @@
+.line-chart {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.line-chart-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.line-value {
+  min-height: 1.5rem;
+}
+
+.line-column {
+  width: 100%;
+  min-height: 12rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.line-point {
+  width: 14px;
+  border-radius: 9999px;
+  background: #fb7185;
+  max-height: 97%;
+}
+
+@media (max-width: 1024px) {
+  .line-chart {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .line-chart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

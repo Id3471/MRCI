@@ -1,0 +1,26 @@
+<app-dashboard-card [subtitle]="subtitle" [title]="title">
+  <p class="mt-3 text-3xl font-semibold text-gray-900">
+    {{ +value | number:'1.0-0' }}{{ suffix }}
+  </p>
+
+  @if (badges.length) {
+    <div class="mt-4 flex flex-wrap gap-2 text-sm">
+      
+      @for (badge of badges; track badge.label) {
+        <span 
+          class="badge" 
+          [class.badge-success]="badge.variant === 'success'"
+          [class.badge-danger]="badge.variant !== 'success'">
+          {{ badge.label }}
+        </span>
+      }
+
+    </div>
+  }
+
+  @if (helperText) {
+    <p class="mt-4 text-sm text-gray-500">
+      {{ helperText }}
+    </p>
+  }
+</app-dashboard-card>

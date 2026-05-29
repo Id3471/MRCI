@@ -1,0 +1,12 @@
+<app-dashboard-card [subtitle]="'Résidences Inactives'" [title]="'Relance nécessaire'">
+  <div class="space-y-3 mt-4">
+    <div *ngFor="let residence of data" class="rounded-2xl border border-red-100 bg-red-50 p-4">
+      <p class="font-semibold text-gray-900">{{ residence.name }}</p>
+      <p class="text-sm text-gray-500">{{ residence.quartier }} · {{ residence.commune }}</p>
+      <p class="mt-2 text-sm text-red-700">Inactif depuis {{ residence.createdAt | date:'MMMM yyyy' }}</p>
+    </div>
+    <div *ngIf="data.length === 0" class="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-gray-600">
+      Aucune résidence inactive pour le moment.
+    </div>
+  </div>
+</app-dashboard-card>

@@ -1,0 +1,13 @@
+<app-dashboard-card [subtitle]="'Typologie des Appartements'" [title]="'Offre par type'">
+  <div class="mt-5 space-y-4">
+    <div *ngFor="let item of data" class="space-y-2">
+      <div class="flex items-center justify-between text-sm text-gray-500">
+        <span>{{ item.type }}</span>
+        <span>{{ item.count }} · {{ item.percent }}%</span>
+      </div>
+      <div class="h-3 rounded-full bg-slate-200 overflow-hidden">
+        <div class="h-full rounded-full bg-[var(--color-accent-2)]" [style.width.%]="item.percent"></div>
+      </div>
+    </div>
+  </div>
+</app-dashboard-card>
