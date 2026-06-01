@@ -15,4 +15,16 @@ export class QuartierService {
   getAllQuartiers(): Observable<QuartierResponse> {
     return this.http.get<QuartierResponse>(`${this.apiUrl}/quartiers`);
   }
+
+  createQuartier(data: { nom: string; communeId: number }) {
+    return this.http.post<QuartierResponse>(`${this.apiUrl}/quartier/create`, data);
+  }
+
+  updateQuartier(id: number, data: { nom?: string; communeId?: number }) {
+    return this.http.put<QuartierResponse>(`${this.apiUrl}/quartier/${id}`, data);
+  }
+
+  deleteQuartier(id: number) {
+    return this.http.delete<QuartierResponse>(`${this.apiUrl}/quartier/${id}`);
+  }
 }

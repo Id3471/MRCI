@@ -1,0 +1,118 @@
+<div class="p-4">
+  <h3 class="text-md font-bold mb-4">Utilisateurs</h3>
+
+  <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left">
+      <thead class="text-xs uppercase bg-primary-light">
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-md font-bold">Utilisateurs</h3>
+            <button class="bg-primary text-white px-4 py-2 rounded" (click)="openCreate()">Ajouter</button>
+          </div>
+
+          <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+              <thead class="text-xs uppercase bg-primary-light">
+                <tr>
+                  <th class="px-6 py-3">Nom</th>
+                  <th class="px-6 py-3">Email</th>
+                  <th class="px-6 py-3">Profil</th>
+                  <th class="px-6 py-3">Résidence</th>
+                  <th class="px-6 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of users" class="bg-white border-b">
+                  <td class="px-6 py-4 font-medium text-gray-900">{{ u.name }}</td>
+                  <td class="px-6 py-4">{{ u.email }}</td>
+                  <td class="px-6 py-4">{{ u.profil?.libelle ?? '-' }}</td>
+                  <td class="px-6 py-4">{{ u.residence_id ?? '-' }}</td>
+                  <td class="px-6 py-4 text-right">
+                    <button class="me-2" (click)="openEdit(u)">Modifier</button>
+                    <button class="me-2" (click)="confirmToggle(u)">{{ u.statut ? 'Désactiver' : 'Activer' }}</button>
+                    <button class="text-red-600" (click)="confirmDelete(u)">Supprimer</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Create -->
+          <div *ngIf="showCreate" class="modal-overlay">
+            <div class="modal">
+              <h4>Ajouter un utilisateur</h4>
+              <div class="mt-2">
+                <label>Nom</label>
+                <input class="w-full p-2 border rounded" [(ngModel)]="createName" />
+              </div>
+              <div class="mt-2">
+                <label>Email</label>
+                <input class="w-full p-2 border rounded" [(ngModel)]="createEmail" />
+              </div>
+              <div class="mt-2">
+                <label>Profil</label>
+                <select class="w-full p-2 border rounded" [(ngModel)]="createProfilId">
+                  <option *ngFor="let p of profils" [ngValue]="p.id">{{ p.libelle }}</option>
+                </select>
+              </div>
+          <div class="mt-2">
+            <label>Résidence</label>
+            <select class="w-full p-2 border rounded" [(ngModel)]="createResidenceId">
+              <option *ngFor="let r of residences" [ngValue]="r.id">{{ r.nom }}</option>
+            </select>
+          </div>
+              <div class="mt-4 flex justify-end">
+                <button class="me-2" (click)="showCreate=false">Annuler</button>
+                <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitCreate()">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit -->
+          <div *ngIf="showEdit" class="modal-overlay">
+            <div class="modal">
+              <h4>Modifier l'utilisateur</h4>
+              <div class="mt-2">
+                <label>Nom</label>
+                <input class="w-full p-2 border rounded" [(ngModel)]="editName" />
+              </div>
+              <div class="mt-2">
+                <label>Email</label>
+                <input class="w-full p-2 border rounded" [(ngModel)]="editEmail" />
+              </div>
+              <div class="mt-2">
+                <label>Profil</label>
+                <select class="w-full p-2 border rounded" [(ngModel)]="editProfilId">
+                  <option *ngFor="let p of profils" [ngValue]="p.id">{{ p.libelle }}</option>
+                </select>
+              </div>
+              <div class="mt-2">
+                <label>Résidence</label>
+                <select class="w-full p-2 border rounded" [(ngModel)]="editResidenceId">
+                  <option *ngFor="let r of residences" [ngValue]="r.id">{{ r.nom }}</option>
+                </select>
+              </div>
+              <div class="mt-4 flex justify-end">
+                <button class="me-2" (click)="showEdit=false">Annuler</button>
+                <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitEdit()">Modifier</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm -->
+          <div *ngIf="showConfirm" class="modal-overlay">
+            <div class="modal">
+              <h4>Confirmation</h4>
+              <p class="mt-2">{{ confirmMessage }}</p>
+              <div class="mt-4 flex justify-end">
+                <button class="me-2" (click)="closeConfirm()">Annuler</button>
+                <button class="bg-red-600 text-white px-3 py-1 rounded" (click)="confirmAction && confirmAction()">Confirmer</button>
+              </div>
+            </div>
+          </div>
+
+        </div>

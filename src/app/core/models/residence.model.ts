@@ -20,6 +20,8 @@ export interface Residence {
   logo?: string;
   commune?: Commune;
   quartier?: Quartier;
+  latitude?: number;
+  longitude?: number;
   created_at?: string;
   updated_at?: string;
 }

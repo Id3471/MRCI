@@ -20,5 +20,25 @@ export class CommoditeService {
   getCommoditeById(id: number): Observable<{ success: boolean; detail?: Commodite }> {
     return this.http.get<{ success: boolean; detail?: Commodite }>(`${this.apiUrl}/${id}`);
   }
+
+  createCommodite(data: Partial<Commodite>) {
+    return this.http.post<CommoditeResponse>(`${this.apiUrl}`, data);
+  }
+
+  updateCommodite(id: number, data: Partial<Commodite>) {
+    return this.http.put<CommoditeResponse>(`${this.apiUrl}/${id}`, data);
+  }
+
+  activateCommodite(id: number) {
+    return this.http.post<CommoditeResponse>(`${this.apiUrl}/active/${id}`, {});
+  }
+
+  deactivateCommodite(id: number) {
+    return this.http.post<CommoditeResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  }
+
+  deleteCommodite(id: number) {
+    return this.http.delete<CommoditeResponse>(`${this.apiUrl}/${id}`);
+  }
 }
 

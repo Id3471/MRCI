@@ -73,7 +73,7 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     forkJoin({
-      residenceResponse: this.residenceService.getAllResidences(),
+      residenceResponse: this.residenceService.getAbsAllResidences(),
       chambreResponse: this.chambreService.getAllChambres(),
       communeResponse: this.communeService.getAllCommunes(),
       commoditeResponse: this.commoditeService.getAllCommodites(),

@@ -20,6 +20,31 @@ export class ResidenceService {
     return this.http.get<ResidenceResponse>(`${this.apiUrl}/list`);
   }
 
+
+  /**
+   * Récupère la liste de toutes les résidences
+   * GET /residence/allList
+   */
+  getAbsAllResidences(): Observable<ResidenceResponse> {
+    return this.http.get<ResidenceResponse>(`${this.apiUrl}/allList`);
+  }
+
+
+  /**
+   * Pagination des résidences actives
+   * GET /residence/list/paginated?limit=10&page=1
+   */
+  getNbResidences(limit: number, page: number): Observable<ResidenceResponse> {
+    return this.http.get<ResidenceResponse>(`${this.apiUrl}/list/paginated`, {
+      // Envoi en int côté back (sinon validation Laravel peut échouer si le type n'est pas integer)
+      params: {
+        limit: String(Math.trunc(limit)),
+        page: String(Math.trunc(page)),
+      },
+    });
+  }
+
+
   /**
    * Récupère une résidence par son ID
    * GET /residence/{id}
@@ -38,21 +63,26 @@ export class ResidenceService {
     formData.append('contact', data.contact);
     formData.append('email', data.email);
     formData.append('manager', data.manager);
-    
+
+    // Laravel create() utilise full_phone pour remplir `contact`
+    if (data.full_phone) {
+      formData.append('full_phone', data.full_phone);
+    } else {
+      // compat: envoyer contact aussi en full_phone si aucun full_phone n'est fourni
+      formData.append('full_phone', data.contact);
+    }
+
     if (data.country_code) {
       formData.append('country_code', data.country_code);
     }
-    
-    if (data.full_phone) {
-      formData.append('full_phone', data.full_phone);
-    }
-    
+
     if (data.logo) {
       formData.append('logo', data.logo, data.logo.name);
     }
 
     return this.http.post<ResidenceResponse>(`${this.apiUrl}/create`, formData);
   }
+
 
   /**
    * Active une résidence

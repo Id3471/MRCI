@@ -1,0 +1,25 @@
+.dashboard-page {
+  width: 100%;
+}
+
+table {
+  table-layout: fixed;
+}
+
+td,
+th {
+  min-width: 0;
+  word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dashboard-page table {
+    width: 100%;
+  }
+}
+

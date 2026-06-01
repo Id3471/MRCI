@@ -19,4 +19,20 @@ export class CommuneService {
   createCommune(libelle: string): Observable<CommuneResponse> {
     return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/create`, { libelle });
   }
+
+  updateCommune(id: number, libelle: string) {
+    return this.http.put<CommuneResponse>(`${this.apiUrl}/commune/${id}`, { libelle });
+  }
+
+  activateCommune(id: number) {
+    return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/active/${id}`, {});
+  }
+
+  deactivateCommune(id: number) {
+    return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/desactive/${id}`, {});
+  }
+
+  deleteCommune(id: number) {
+    return this.http.delete<CommuneResponse>(`${this.apiUrl}/commune/${id}`);
+  }
 }
