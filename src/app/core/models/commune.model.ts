@@ -5,6 +5,10 @@ export interface Commune {
   statut?: boolean;
 }
 
+export interface CreateCommuneDTO {
+  libelle?: string;
+}
+
 export interface CommuneResponse {
   result?: Commune[];
   success?: boolean;

@@ -79,7 +79,6 @@ export class Dashboard implements OnInit {
       commoditeResponse: this.commoditeService.getAllCommodites(),
     }).subscribe({
       next: ({ residenceResponse, chambreResponse, communeResponse, commoditeResponse }) => {
-        console.log('Dashboard API responses', { residenceResponse, chambreResponse, communeResponse, commoditeResponse });
         this.communes = communeResponse.result ?? [];
 
         this.commoditeById = (commoditeResponse.commodites ?? []).reduce(
@@ -102,10 +101,7 @@ export class Dashboard implements OnInit {
 
         this.residences = this.mapResidences(residenceResponse.result);
         this.apartments = this.mapChambres(chambreResponse.result);
-        console.log('Dashboard mapped data', {
-          residences: this.residences,
-          apartments: this.apartments,
-        });
+
         this.loading = false;
         this.cd.detectChanges();
       },

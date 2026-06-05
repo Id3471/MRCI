@@ -8,12 +8,12 @@ import { Commodite, CommoditeResponse } from '../../models/commodite.model';
   providedIn: 'root',
 })
 export class CommoditeService {
-  private apiUrl = `${API_CONFIG.baseUrl}/commodites`;
+  private apiUrl = `${API_CONFIG.baseUrl}/commodite`;
 
   constructor(private http: HttpClient) {}
 
   getAllCommodites(): Observable<CommoditeResponse> {
-    return this.http.get<CommoditeResponse>(`${this.apiUrl}`);
+    return this.http.get<CommoditeResponse>(`${this.apiUrl}/list`);
   }
 
   // utile si besoin plus tard

@@ -5,7 +5,7 @@ import { API_CONFIG } from '../../config/api.config';
 import { Residence, CreateResidenceDto, ResidenceResponse } from '../../models/residence.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ResidenceService {
   private apiUrl = `${API_CONFIG.baseUrl}/residence`;
@@ -20,7 +20,6 @@ export class ResidenceService {
     return this.http.get<ResidenceResponse>(`${this.apiUrl}/list`);
   }
 
-
   /**
    * Récupère la liste de toutes les résidences
    * GET /residence/allList
@@ -28,7 +27,6 @@ export class ResidenceService {
   getAbsAllResidences(): Observable<ResidenceResponse> {
     return this.http.get<ResidenceResponse>(`${this.apiUrl}/allList`);
   }
-
 
   /**
    * Pagination des résidences actives
@@ -43,7 +41,6 @@ export class ResidenceService {
       },
     });
   }
-
 
   /**
    * Récupère une résidence par son ID
@@ -64,11 +61,9 @@ export class ResidenceService {
     formData.append('email', data.email);
     formData.append('manager', data.manager);
 
-    // Laravel create() utilise full_phone pour remplir `contact`
     if (data.full_phone) {
       formData.append('full_phone', data.full_phone);
     } else {
-      // compat: envoyer contact aussi en full_phone si aucun full_phone n'est fourni
       formData.append('full_phone', data.contact);
     }
 
@@ -79,25 +74,23 @@ export class ResidenceService {
     if (data.logo) {
       formData.append('logo', data.logo, data.logo.name);
     }
-
     return this.http.post<ResidenceResponse>(`${this.apiUrl}/create`, formData);
   }
 
-
   /**
    * Active une résidence
-   * POST /residence/active/{id}
+   * PATCH /residence/active/{id}
    */
   activateResidence(id: number): Observable<ResidenceResponse> {
-    return this.http.post<ResidenceResponse>(`${this.apiUrl}/active/${id}`, {});
+    return this.http.patch<ResidenceResponse>(`${this.apiUrl}/active/${id}`, {});
   }
 
   /**
    * Désactive une résidence
-   * POST /residence/desactive/{id}
+   * PATCH /residence/desactive/{id}
    */
   deactivateResidence(id: number): Observable<ResidenceResponse> {
-    return this.http.post<ResidenceResponse>(`${this.apiUrl}/desactive/${id}`, {});
+    return this.http.patch<ResidenceResponse>(`${this.apiUrl}/desactive/${id}`, {});
   }
 
   /**
@@ -105,32 +98,38 @@ export class ResidenceService {
    * DELETE /residence/{id}
    */
   deleteResidence(id: number): Observable<ResidenceResponse> {
-    return this.http.delete<ResidenceResponse>(`${this.apiUrl}/${id}`);
+    return this.http.delete<ResidenceResponse>(`${this.apiUrl}/delete/${id}`);
   }
 
   /**
    * Met à jour une résidence
-   * PUT /residence/{id}
+   * POST /residence/update/{id}
    */
-  updateResidence(id: number, data: Partial<CreateResidenceDto>): Observable<ResidenceResponse> {
+  updateResidence(
+    id: number,
+    data: Partial<CreateResidenceDto> = {},
+  ): Observable<ResidenceResponse> {
     const formData = new FormData();
-    
-    if (data.denomination) {
-      formData.append('denomination', data.denomination);
-    }
-    if (data.contact) {
-      formData.append('contact', data.contact);
-    }
-    if (data.email) {
-      formData.append('email', data.email);
-    }
-    if (data.manager) {
-      formData.append('manager', data.manager);
-    }
-    if (data.logo) {
+
+    formData.append('_method', 'POST');
+
+    const appendIfDefined = (key: string, value: any) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    };
+
+    appendIfDefined('denomination', data.denomination);
+    appendIfDefined('contact', data.contact);
+    appendIfDefined('email', data.email);
+    appendIfDefined('manager', data.manager);
+    appendIfDefined('full_phone', data.full_phone);
+    appendIfDefined('country_code', data.country_code);
+
+    if (data.logo instanceof File) {
       formData.append('logo', data.logo, data.logo.name);
     }
 
-    return this.http.put<ResidenceResponse>(`${this.apiUrl}/${id}`, formData);
+    return this.http.post<ResidenceResponse>(`${this.apiUrl}/update/${id}`, formData);
   }
 }
