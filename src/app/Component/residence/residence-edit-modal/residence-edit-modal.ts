@@ -11,13 +11,12 @@ export type ResidenceEditPayload = { id: number; data: Partial<CreateResidenceDt
   templateUrl: './residence-edit-modal.html',
 })
 export class ResidenceEditModalComponent implements OnChanges {
-  @Input() open = false;
   @Input() targetId = 0;
   @Input() initialValue: Partial<CreateResidenceDto> | null = null;
   @Input() initialLogoUrl: string | null = null;
   @Input() residence!: Residence
 
-  @Output() close = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
   @Output() OnSubmit = new EventEmitter<ResidenceEditPayload>();
 
   formValue: Partial<CreateResidenceDto> = {
@@ -32,7 +31,7 @@ export class ResidenceEditModalComponent implements OnChanges {
   private objectUrl: string | null = null;
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes['initialValue'] || changes['open']) && this.open && this.initialValue) {
+    if (changes['initialValue'] && this.initialValue) {
       this.formValue = {
         denomination: this.initialValue.denomination ?? '',
         contact: this.initialValue.contact ?? '',

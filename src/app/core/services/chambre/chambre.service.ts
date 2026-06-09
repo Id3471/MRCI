@@ -1,54 +1,45 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
-import { Chambre, ChambreResponse, ChambreSearchParams, ChambreProchesParams } from '../../models/chambre.model';
+import { AppartementResponse } from '../../models/chambre.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class ChambreService {
+export class AppartementService {
   private apiUrl = `${API_CONFIG.baseUrl}/chambre`;
 
   constructor(private http: HttpClient) {}
 
-  getAllChambres(): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/list`);
+  getAll(): Observable<AppartementResponse> {
+    return this.http.get<AppartementResponse>(`${this.apiUrl}/list`);
   }
 
-  getChambreById(id: number): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/${id}`);
+  getPaginated(limit: number, page: number): Observable<AppartementResponse> {
+    return this.http.get<AppartementResponse>(`${this.apiUrl}/list/paginated`, {
+      params: { limit: String(limit), page: String(page) },
+    });
   }
 
-  getChambreByResidenceId(id: number): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/residence/${id}`);
+  // Utilisation de FormData pour gérer les fichiers (images)
+  createAppartement(data: FormData): Observable<AppartementResponse> {
+    return this.http.post<AppartementResponse>(`${this.apiUrl}/create`, data);
   }
 
-  getTypePieceByResidenceId(id: number): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/type/residence/${id}`);
+  updateAppartement(id: number, data: FormData): Observable<AppartementResponse> {
+    return this.http.put<AppartementResponse>(`${this.apiUrl}/update/${id}`, data);
   }
 
-  getBestChambres(): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/best/list`);
+  activateAppartement(id: number): Observable<AppartementResponse> {
+    return this.http.patch<AppartementResponse>(`${this.apiUrl}/active/${id}`, {});
   }
 
-  searchChambre(params: ChambreSearchParams = {}): Observable<ChambreResponse> {
-    let httpParams = new HttpParams();
-    if (params.searchTerm) {
-      httpParams = httpParams.set('searchTerm', params.searchTerm);
-    }
-    return this.http.get<ChambreResponse>(`${API_CONFIG.baseUrl}/chambre-search`, { params: httpParams });
+  deactivateAppartement(id: number): Observable<AppartementResponse> {
+    return this.http.patch<AppartementResponse>(`${this.apiUrl}/desactive/${id}`, {});
   }
 
-  getTenFirstChambres(): Observable<ChambreResponse> {
-    return this.http.get<ChambreResponse>(`${this.apiUrl}/tenfirst/list`);
-  }
-
-  getChambresProches(params: ChambreProchesParams): Observable<ChambreResponse> {
-    const httpParams = new HttpParams()
-      .set('latitude', String(params.latitude))
-      .set('longitude', String(params.longitude));
-
-    return this.http.get<ChambreResponse>(`${API_CONFIG.baseUrl}/chambre-proches`, { params: httpParams });
+  deleteAppartement(id: number): Observable<AppartementResponse> {
+    return this.http.delete<AppartementResponse>(`${this.apiUrl}/delete/${id}`);
   }
 }

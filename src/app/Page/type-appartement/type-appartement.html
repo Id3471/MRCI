@@ -1,76 +1,39 @@
-<div class="p-4">
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="text-md font-bold">Types d'appartement</h3>
-    <button class="bg-primary text-white px-4 py-2 rounded" (click)="openCreate()">Ajouter</button>
-  </div>
+<app-crud-page
+  titre="Liste des types d'appartements"
+  searchPlaceholder="Rechercher par désignation..."
+  [data]="displayedTypes"
+  [columns]="tableColumns"
+  [actionsConfig]="{ canEdit: true, canDelete: true, canToggle: true, toggleKey: 'statut' }"
+  [page]="page"
+  [perPage]="perPage"
+  [total]="total"
+  [lastPage]="lastPage"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  
+  (searchChange)="onSearchChange($event)"
+  (perPageChange)="onPerPageChange($event)"
+  (pageChange)="onPageChange($event)"
+  (addClick)="openCreate()"
+  (editClick)="openEdit($event)"
+  (deleteClick)="openConfirmDelete($event)"
+  (toggleClick)="openConfirmToggle($event)">
+</app-crud-page>
 
-  <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+<app-generic-modal [open]="createOpen" titre="Ajouter un type" (close)="closeCreate()" maxWidthClass="max-w-md">
+  <app-create-type-apt [loading]="isCreating" (create)="onCreateSubmit($event)" (cancel)="closeCreate()" />
+</app-generic-modal>
 
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left">
-      <thead class="text-xs uppercase bg-primary-light">
-        <tr>
-          <th class="px-4 py-2">Date création</th>
-          <th class="px-4 py-2">Libellé</th>
-          <th class="px-4 py-2">Statut</th>
-          <th class="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let t of types" class="border-b">
-          <td class="px-4 py-2">{{ t.created_at }}</td>
-          <td class="px-4 py-2">{{ t.libelle }}</td>
-          <td class="px-4 py-2">{{ t.statut ? 'Actif' : 'Inactif' }}</td>
-          <td class="px-4 py-2 text-right">
-            <button class="me-2" (click)="openEdit(t)">Modifier</button>
-            <button class="me-2" (click)="confirmToggle(t)">{{ t.statut ? 'Désactiver' : 'Activer' }}</button>
-            <button class="text-red-600" (click)="confirmDelete(t)">Supprimer</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<app-generic-modal [open]="editOpen" titre="Modification d'un type" (close)="closeEdit()" maxWidthClass="max-w-md">
+  <app-update-type-apt [targetId]="editTargetId" [initialValue]="editFormData" [typeAppartement]="itemToEdit" (OnSubmit)="onEditSubmit($event)" (cancel)="closeEdit()" />
+</app-generic-modal>
 
-  <!-- Create -->
-  <div *ngIf="showCreate" class="modal-overlay">
-    <div class="modal">
-      <h4>Ajouter un type</h4>
-      <div class="mt-2">
-        <label>Libellé</label>
-        <input class="w-full p-2 border rounded" [(ngModel)]="createLibelle" />
-      </div>
-      <div class="mt-4 flex justify-end">
-        <button class="me-2" (click)="showCreate=false">Annuler</button>
-        <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitCreate()">Enregistrer</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit -->
-  <div *ngIf="showEdit" class="modal-overlay">
-    <div class="modal">
-      <h4>Modifier le type</h4>
-      <div class="mt-2">
-        <label>Libellé</label>
-        <input class="w-full p-2 border rounded" [(ngModel)]="editLibelle" />
-      </div>
-      <div class="mt-4 flex justify-end">
-        <button class="me-2" (click)="showEdit=false">Annuler</button>
-        <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitEdit()">Modifier</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Confirm -->
-  <div *ngIf="showConfirm" class="modal-overlay">
-    <div class="modal">
-      <h4>Confirmation</h4>
-      <p class="mt-2">{{ confirmMessage }}</p>
-      <div class="mt-4 flex justify-end">
-        <button class="me-2" (click)="closeConfirm()">Annuler</button>
-        <button class="bg-red-600 text-white px-3 py-1 rounded" (click)="confirmAction && confirmAction()">Confirmer</button>
-      </div>
-    </div>
-  </div>
-
-</div>
+<app-confirm-modal
+  [open]="confirmOpen"
+  [titre]="confirmtitre"
+  [message]="confirmMessage"
+  [confirmButtonLabel]="confirmButtonLabel"
+  [confirmColorClass]="confirmColorClass"
+  (confirm)="confirmAction?.()"
+  (cancel)="cancelConfirm()">
+</app-confirm-modal>

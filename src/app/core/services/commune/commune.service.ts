@@ -2,37 +2,38 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
-import { CommuneResponse, Commune } from '../../models/commune.model';
+import { CommuneResponse, CreateCommuneDto } from '../../models/commune.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommuneService {
-  private apiUrl = API_CONFIG.baseUrl;
+  private apiUrl = `${API_CONFIG.baseUrl}/commune`;
 
   constructor(private http: HttpClient) {}
 
   getAllCommunes(): Observable<CommuneResponse> {
-    return this.http.get<CommuneResponse>(`${this.apiUrl}/communes`);
+    return this.http.get<CommuneResponse>(`${this.apiUrl}/list`);
   }
 
-  createCommune(libelle: string): Observable<CommuneResponse> {
-    return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/create`, { libelle });
+  getPaginatedCommunes(limit: number, page: number): Observable<CommuneResponse> {
+    return this.http.get<CommuneResponse>(`${this.apiUrl}/list/paginated`, {
+      params: {
+        limit: String(Math.trunc(limit)),
+        page: String(Math.trunc(page)),
+      },
+    });
   }
 
-  updateCommune(id: number, libelle: string) {
-    return this.http.put<CommuneResponse>(`${this.apiUrl}/commune/${id}`, { libelle });
+  createCommune(data: CreateCommuneDto): Observable<CommuneResponse> {
+    return this.http.post<CommuneResponse>(`${this.apiUrl}/create`, data);
   }
 
-  activateCommune(id: number) {
-    return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/active/${id}`, {});
+  updateCommune(id: number, data: Partial<CreateCommuneDto>): Observable<CommuneResponse> {
+    return this.http.put<CommuneResponse>(`${this.apiUrl}/update/${id}`, data);
   }
 
-  deactivateCommune(id: number) {
-    return this.http.post<CommuneResponse>(`${this.apiUrl}/commune/desactive/${id}`, {});
-  }
-
-  deleteCommune(id: number) {
-    return this.http.delete<CommuneResponse>(`${this.apiUrl}/commune/${id}`);
+  deleteCommune(id: number): Observable<CommuneResponse> {
+    return this.http.delete<CommuneResponse>(`${this.apiUrl}/delete/${id}`);
   }
 }

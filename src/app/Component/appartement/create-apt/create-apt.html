@@ -1,0 +1,163 @@
+<form (ngSubmit)="onSubmit()" #f="ngForm" class="px-6 py-3 space-y-6 relative">
+  
+  <!-- Stepper Header -->
+  <div class="flex items-center justify-between px-2 py-2 border-b border-gray-200 mb-6">
+    <div class="flex-1 text-center relative" *ngFor="let s of [1, 2, 3]; let i = index">
+      <div [ngClass]="step >= s ? 'bg-[var(--Color-2,#fe0000)] text-white' : 'bg-gray-300 text-gray-600'"
+           class="w-10 h-10 mx-auto rounded-full flex items-center justify-center font-semibold transition-colors duration-300">
+        {{ s }}
+      </div>
+      <p class="text-sm mt-2 font-medium" [ngClass]="step >= s ? 'text-gray-900' : 'text-gray-500'">
+        {{ s === 1 ? 'Informations' : s === 2 ? 'Localisation' : 'Commodités' }}
+      </p>
+      <!-- Ligne de connexion -->
+      <div *ngIf="s < 3" [ngClass]="step > s ? 'bg-[var(--Color-2,#fe0000)]' : 'bg-gray-300'"
+           class="absolute top-5 right-[-50%] w-full h-1 transition-all duration-300 -z-10"></div>
+    </div>
+  </div>
+
+  <!-- Étape 1 : Informations -->
+  <div *ngIf="step === 1" class="animate-[fadeIn_0.3s_ease-out]">
+    <div class="mb-4" *ngIf="!userresidenceId">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Résidence *</label>
+      <select name="residenceId" [(ngModel)]="formValue.residenceId" required
+        class="w-full rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500 text-sm p-2.5">
+        <option value="" disabled selected>Choisir une résidence...</option>
+        <option *ngFor="let r of residences" [value]="r.id">{{ r.nom }}</option>
+      </select>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+        <select name="typeId" [(ngModel)]="formValue.typeId" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 focus:border-red-500 text-sm p-2.5">
+          <option value="" disabled selected>Choisir un type...</option>
+          <option *ngFor="let t of types" [value]="t.id">{{ t.libelle }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Code *</label>
+        <input type="text" name="code" [(ngModel)]="formValue.code" placeholder="Ex : APT001" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-2.5">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de pièces *</label>
+        <input type="number" name="nombrePiece" [(ngModel)]="formValue.nombrePiece" placeholder="Ex : 3" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-2.5">
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5 mt-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Prix (FCFA) *</label>
+        <input type="number" name="prix" [(ngModel)]="formValue.prix" placeholder="Ex : 150000" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-2.5">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Image principale *</label>
+        <input type="file" (change)="onMainImageSelected($event)" accept="image/*" required
+          class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg cursor-pointer file:bg-red-50 file:text-red-700 file:border-0 file:py-2 file:px-4">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Images (Galerie) *</label>
+        <input type="file" (change)="onGallerySelected($event)" multiple accept="image/*"
+          class="block w-full text-sm text-gray-600 border border-gray-300 rounded-lg cursor-pointer file:bg-red-50 file:text-red-700 file:border-0 file:py-2 file:px-4">
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+      <textarea name="description" [(ngModel)]="formValue.description" rows="3" required
+        class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-3 resize-none" placeholder="Décrivez l’appartement..."></textarea>
+    </div>
+  </div>
+
+  <!-- Étape 2 : Localisation -->
+  <div *ngIf="step === 2" class="animate-[fadeIn_0.3s_ease-out]">
+    <div class="grid md:grid-cols-2 gap-5 mb-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Commune *</label>
+        <select name="communeId" [(ngModel)]="formValue.communeId" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-2.5">
+          <option value="" disabled>--------------------------</option>
+          <option *ngFor="let c of communes" [value]="c.id">{{ c.nom }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Quartier *</label>
+        <select name="quartierId" [(ngModel)]="formValue.quartierId" required
+          class="w-full rounded-lg border border-gray-300 focus:ring-red-500 text-sm p-2.5">
+          <option value="" disabled>--------------------------</option>
+          <option *ngFor="let q of quartiers" [value]="q.id">{{ q.nom }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Adresse *</label>
+        <input type="text" name="adresse" [(ngModel)]="formValue.adresse" required
+          class="w-full border border-gray-300 rounded-lg focus:ring-red-500 text-sm p-2.5">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Rue *</label>
+        <input type="text" name="rue" [(ngModel)]="formValue.rue" required
+          class="w-full border border-gray-300 rounded-lg focus:ring-red-500 text-sm p-2.5">
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-5 mt-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Longitude *</label>
+        <input type="text" name="longitude" [(ngModel)]="formValue.longitude" required readonly
+          class="w-full border border-gray-300 rounded-lg focus:ring-red-500 text-sm p-2.5">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Latitude *</label>
+        <input type="text" name="latitude" [(ngModel)]="formValue.latitude" required readonly
+          class="w-full border border-gray-300 rounded-lg focus:ring-red-500 text-sm p-2.5">
+      </div>
+    </div>
+    
+    <div class="mt-5">
+      <!-- Div Placeholder pour la Map -->
+      <div id="map" class="h-[250px] bg-gray-100 flex items-center justify-center border border-gray-300 rounded-md text-gray-400">
+         [Carte (Leaflet/Google Maps) à initialiser ici]
+      </div>
+    </div>
+  </div>
+
+  <!-- Étape 3 : Commodités -->
+  <div *ngIf="step === 3" class="animate-[fadeIn_0.3s_ease-out]">
+    <h4 class="text-sm font-semibold text-gray-800 mb-3">Sélectionnez les commodités *</h4>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <label *ngFor="let comm of commodites" class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+        <input type="checkbox" [value]="comm.id" (change)="toggleCommodite(comm.id)"
+          class="text-red-600 focus:ring-red-500 rounded border-gray-300 w-4 h-4">
+        <span class="text-sm text-gray-700">{{ comm.libelle }}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="flex justify-between border-t border-gray-200 pt-4 mt-6">
+    <button type="button" *ngIf="step > 1" (click)="changeStep(step - 1)"
+      class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+      <i class="fa fa-arrow-left me-2"></i> Précédent
+    </button>
+    <div *ngIf="step === 1"></div> <!-- Spacer if no prev button -->
+
+    <button type="button" *ngIf="step < 3" (click)="changeStep(step + 1)"
+      class="px-5 py-2.5 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-700">
+      Suivant <i class="fa fa-arrow-right ms-2"></i>
+    </button>
+
+    <button type="submit" *ngIf="step === 3" [disabled]="loading || formSubmitting"
+      class="px-6 py-2.5 text-sm font-medium text-white bg-[var(--Color-2,#fe0000)] rounded-lg hover:opacity-90 disabled:opacity-50">
+      <i class="fa fa-save me-2" *ngIf="!loading && !formSubmitting"></i>
+      <i class="fa fa-circle-notch fa-spin me-2" *ngIf="loading || formSubmitting"></i>
+      {{ (loading || formSubmitting) ? 'Création...' : 'Ajouter' }}
+    </button>
+  </div>
+</form>

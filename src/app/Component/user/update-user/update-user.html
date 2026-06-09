@@ -1,0 +1,46 @@
+<form (ngSubmit)="OnSubmit.emit({ id: targetId, data: formValue })" #f="ngForm" class="px-6 py-5">
+  <div class="grid grid-cols-1 gap-4">
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-900">
+        Nom & Prénoms <span class="text-red-500">*</span>
+      </label>
+      <input [(ngModel)]="formValue.nom" name="nom" required type="text"
+        class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-200 focus:ring-4 focus:ring-blue-100"
+        placeholder="Nom" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-900">
+        Email <span class="text-red-500">*</span>
+      </label>
+      <input [(ngModel)]="formValue.email" name="email" required type="email"
+        class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-200 focus:ring-4 focus:ring-blue-100"
+        placeholder="Email" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-900">Résidence</label>
+      <select [(ngModel)]="formValue.residenceId" name="residenceId"
+        class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-200 focus:ring-4 focus:ring-blue-100">
+        <option [value]="null">------------------</option>
+        <option *ngFor="let residence of residences" [value]="residence.id">
+          {{ residence.nom }}
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="mt-6 flex items-center justify-end gap-3">
+    <button type="button" (click)="cancel.emit()"
+      class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+      Annuler
+    </button>
+    <button type="submit" [disabled]="f.invalid"
+      class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+      <i class="fa fa-save"></i>
+      Modifier
+    </button>
+  </div>
+</form>

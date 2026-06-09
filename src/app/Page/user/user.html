@@ -1,118 +1,74 @@
-<div class="p-4">
-  <h3 class="text-md font-bold mb-4">Utilisateurs</h3>
+<!-- Section d'attribution de profil par lot -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
+  <div class="md:col-span-2">
+    <label class="block mb-2 text-sm font-medium text-gray-900">
+      Profils à attribuer <span class="text-red-600">*</span>
+    </label>
+    <select [(ngModel)]="selectedProfilId" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-400 block w-full p-2.5 outline-none transition-all">
+      <option [value]="null">------------------</option>
+      <option *ngFor="let profil of profils" [value]="profil.id">
+        {{ profil.libelle }}
+      </option>
+    </select>
+  </div>
+  <div class="flex items-end shadow-none">
+    <button type="button" (click)="onAssignProfile()" [disabled]="!selectedProfilId || isAssigning"
+            class="w-full text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 focus:ring-4 focus:outline-none focus:ring-blue-100 font-medium rounded-xl text-sm px-8 py-3 text-center transition-all">
+      <i class="fa mr-2" [ngClass]="isAssigning ? 'fa-spinner fa-spin' : 'fa-check'"></i> ATTRIBUER
+    </button>
+  </div>
+</div>
 
-  <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+<!-- Composant de page CRUD Générique -->
+<app-crud-page
+  titre="La liste des utilisateurs"
+  searchPlaceholder="Rechercher par nom ou email"
+  [data]="displayedUsers"
+  [columns]="tableColumns"
+  [actionsConfig]="{ canEdit: true, canDelete: true, canToggle: true, toggleKey: 'statut' }"
+  [page]="page"
+  [perPage]="perPage"
+  [total]="total"
+  [lastPage]="lastPage"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  
+  (searchChange)="onSearchChange($event)"
+  (perPageChange)="onPerPageChange($event)"
+  (pageChange)="onPageChange($event)"
+  (addClick)="openCreate()"
+  (editClick)="openEdit($event)"
+  (deleteClick)="openConfirmDelete($event)"
+  (toggleClick)="openConfirmToggle($event)">
+</app-crud-page>
 
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left">
-      <thead class="text-xs uppercase bg-primary-light">
-        <div class="p-4">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-md font-bold">Utilisateurs</h3>
-            <button class="bg-primary text-white px-4 py-2 rounded" (click)="openCreate()">Ajouter</button>
-          </div>
+<!-- Modal d'ajout d'un utilisateur -->
+<app-generic-modal [open]="createOpen" titre="Ajouter un utilisateur" (close)="closeCreate()">
+  <app-create-user
+    [loading]="isCreating" 
+    [residences]="residences"
+    (create)="onCreateSubmit($event)" 
+    (cancel)="closeCreate()" />
+</app-generic-modal>
 
-          <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+<!-- Modal de modification d'un utilisateur -->
+<app-generic-modal [open]="editOpen" titre="Modification Utilisateur" (close)="closeEdit()">
+  <app-update-user
+    [targetId]="editTargetId" 
+    [initialValue]="editFormData" 
+    [residences]="residences"
+    [user]="usertoedit" 
+    (OnSubmit)="onEditSubmit($event)" 
+    (cancel)="closeEdit()" />
+</app-generic-modal>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-              <thead class="text-xs uppercase bg-primary-light">
-                <tr>
-                  <th class="px-6 py-3">Nom</th>
-                  <th class="px-6 py-3">Email</th>
-                  <th class="px-6 py-3">Profil</th>
-                  <th class="px-6 py-3">Résidence</th>
-                  <th class="px-6 py-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let u of users" class="bg-white border-b">
-                  <td class="px-6 py-4 font-medium text-gray-900">{{ u.name }}</td>
-                  <td class="px-6 py-4">{{ u.email }}</td>
-                  <td class="px-6 py-4">{{ u.profil?.libelle ?? '-' }}</td>
-                  <td class="px-6 py-4">{{ u.residence_id ?? '-' }}</td>
-                  <td class="px-6 py-4 text-right">
-                    <button class="me-2" (click)="openEdit(u)">Modifier</button>
-                    <button class="me-2" (click)="confirmToggle(u)">{{ u.statut ? 'Désactiver' : 'Activer' }}</button>
-                    <button class="text-red-600" (click)="confirmDelete(u)">Supprimer</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Create -->
-          <div *ngIf="showCreate" class="modal-overlay">
-            <div class="modal">
-              <h4>Ajouter un utilisateur</h4>
-              <div class="mt-2">
-                <label>Nom</label>
-                <input class="w-full p-2 border rounded" [(ngModel)]="createName" />
-              </div>
-              <div class="mt-2">
-                <label>Email</label>
-                <input class="w-full p-2 border rounded" [(ngModel)]="createEmail" />
-              </div>
-              <div class="mt-2">
-                <label>Profil</label>
-                <select class="w-full p-2 border rounded" [(ngModel)]="createProfilId">
-                  <option *ngFor="let p of profils" [ngValue]="p.id">{{ p.libelle }}</option>
-                </select>
-              </div>
-          <div class="mt-2">
-            <label>Résidence</label>
-            <select class="w-full p-2 border rounded" [(ngModel)]="createResidenceId">
-              <option *ngFor="let r of residences" [ngValue]="r.id">{{ r.nom }}</option>
-            </select>
-          </div>
-              <div class="mt-4 flex justify-end">
-                <button class="me-2" (click)="showCreate=false">Annuler</button>
-                <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitCreate()">Enregistrer</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Edit -->
-          <div *ngIf="showEdit" class="modal-overlay">
-            <div class="modal">
-              <h4>Modifier l'utilisateur</h4>
-              <div class="mt-2">
-                <label>Nom</label>
-                <input class="w-full p-2 border rounded" [(ngModel)]="editName" />
-              </div>
-              <div class="mt-2">
-                <label>Email</label>
-                <input class="w-full p-2 border rounded" [(ngModel)]="editEmail" />
-              </div>
-              <div class="mt-2">
-                <label>Profil</label>
-                <select class="w-full p-2 border rounded" [(ngModel)]="editProfilId">
-                  <option *ngFor="let p of profils" [ngValue]="p.id">{{ p.libelle }}</option>
-                </select>
-              </div>
-              <div class="mt-2">
-                <label>Résidence</label>
-                <select class="w-full p-2 border rounded" [(ngModel)]="editResidenceId">
-                  <option *ngFor="let r of residences" [ngValue]="r.id">{{ r.nom }}</option>
-                </select>
-              </div>
-              <div class="mt-4 flex justify-end">
-                <button class="me-2" (click)="showEdit=false">Annuler</button>
-                <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitEdit()">Modifier</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Confirm -->
-          <div *ngIf="showConfirm" class="modal-overlay">
-            <div class="modal">
-              <h4>Confirmation</h4>
-              <p class="mt-2">{{ confirmMessage }}</p>
-              <div class="mt-4 flex justify-end">
-                <button class="me-2" (click)="closeConfirm()">Annuler</button>
-                <button class="bg-red-600 text-white px-3 py-1 rounded" (click)="confirmAction && confirmAction()">Confirmer</button>
-              </div>
-            </div>
-          </div>
-
-        </div>
+<!-- Modal de confirmation des actions sensibles (Suppression / Toggle Statut) -->
+<app-confirm-modal
+  [open]="confirmOpen"
+  [titre]="confirmtitre"
+  [message]="confirmMessage"
+  [confirmButtonLabel]="confirmButtonLabel"
+  [confirmColorClass]="confirmColorClass"
+  (confirm)="confirmAction?.()"
+  (cancel)="cancelConfirm()">
+</app-confirm-modal>

@@ -2,37 +2,46 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
-import { ProfilResponse, Profil } from '../../models/profil.model';
+import { ProfilResponse, CreateProfilDto } from '../../models/profil.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProfilService {
-  private apiUrl = `${API_CONFIG.baseUrl}/profils`;
+  private apiUrl = `${API_CONFIG.baseUrl}/profil`;
 
   constructor(private http: HttpClient) {}
 
   getAllProfils(): Observable<ProfilResponse> {
-    return this.http.get<ProfilResponse>(`${this.apiUrl}`);
+    return this.http.get<ProfilResponse>(`${this.apiUrl}/list`);
   }
 
-  createProfil(data: Partial<Profil>): Observable<ProfilResponse> {
-    return this.http.post<ProfilResponse>(`${this.apiUrl}`, data);
+  getPaginatedProfils(limit: number, page: number): Observable<ProfilResponse> {
+    return this.http.get<ProfilResponse>(`${this.apiUrl}/list/paginated`, {
+      params: {
+        limit: String(Math.trunc(limit)),
+        page: String(Math.trunc(page)),
+      },
+    });
   }
 
-  updateProfil(id: number, data: Partial<Profil>): Observable<ProfilResponse> {
-    return this.http.put<ProfilResponse>(`${this.apiUrl}/${id}`, data);
+  createProfil(data: CreateProfilDto): Observable<ProfilResponse> {
+    return this.http.post<ProfilResponse>(`${this.apiUrl}/create`, data);
   }
 
-  activateProfil(id: number) {
-    return this.http.post<ProfilResponse>(`${this.apiUrl}/active/${id}`, {});
+  updateProfil(id: number, data: Partial<CreateProfilDto>): Observable<ProfilResponse> {
+    return this.http.put<ProfilResponse>(`${this.apiUrl}/update/${id}`, data);
   }
 
-  deactivateProfil(id: number) {
-    return this.http.post<ProfilResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  activateProfil(id: number): Observable<ProfilResponse> {
+    return this.http.patch<ProfilResponse>(`${this.apiUrl}/active/${id}`, {});
   }
 
-  deleteProfil(id: number) {
-    return this.http.delete<ProfilResponse>(`${this.apiUrl}/${id}`);
+  deactivateProfil(id: number): Observable<ProfilResponse> {
+    return this.http.patch<ProfilResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  }
+
+  deleteProfil(id: number): Observable<ProfilResponse> {
+    return this.http.delete<ProfilResponse>(`${this.apiUrl}/delete/${id}`);
   }
 }

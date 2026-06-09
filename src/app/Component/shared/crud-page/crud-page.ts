@@ -1,44 +1,61 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
-export interface CrudColumn {
-  key: string;
-  label: string;
-}
+import { CrudActionsConfig, CrudColumn } from '../../../core/models/crud.model';
+import { PageHeader } from "../page-header/page-header";
 
 @Component({
   selector: 'app-crud-page',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PageHeader],
   templateUrl: './crud-page.html',
   styleUrl: './crud-page.css',
 })
 export class CrudPage {
-  @Input() title = '';
-
+  @Input() titre = 'Liste';
   @Input() data: any[] = [];
+  @Input() columns: CrudColumn[] = [];
+  @Input() actionsConfig: CrudActionsConfig = { canEdit: true, canDelete: true, canToggle: false };
+  @Input() searchPlaceholder = 'Rechercher...';
 
-  @Input() columns: any[] = [];
-
+  // Pagination State
   @Input() page = 1;
-
+  @Input() perPage = 5;
+  @Input() total = 0;
   @Input() lastPage = 1;
 
-  @Input() total = 0;
+  // Alerts
+  @Input() errorMessage: string | null = null;
+  @Input() successMessage: string | null = null;
 
-  @Input() searchTerm = '';
-
-  @Output() create = new EventEmitter<void>();
-
-  @Output() edit = new EventEmitter<any>();
-
-  @Output() delete = new EventEmitter<any>();
-
-  @Output() toggle = new EventEmitter<any>();
+  searchTerm = '';
 
   @Output() searchChange = new EventEmitter<string>();
+  @Output() perPageChange = new EventEmitter<number>();
+  @Output() pageChange = new EventEmitter<number>();
 
-  @Output() prevPage = new EventEmitter<void>();
+  @Output() addClick = new EventEmitter<void>();
+  @Output() editClick = new EventEmitter<any>();
+  @Output() deleteClick = new EventEmitter<any>();
+  @Output() toggleClick = new EventEmitter<any>();
 
-  @Output() nextPage = new EventEmitter<void>();
+  onSearch(term: string) {
+    this.searchChange.emit(term);
+  }
+
+  changePerPage(value: number) {
+    this.perPageChange.emit(value);
+  }
+
+  goPrev() {
+    if (this.page > 1) this.pageChange.emit(this.page - 1);
+  }
+
+  goNext() {
+    if (this.page < this.lastPage) this.pageChange.emit(this.page + 1);
+  }
+
+  getToggleState(item: any): boolean {
+    if (!this.actionsConfig.toggleKey) return false;
+    return item[this.actionsConfig.toggleKey] === true;
+  }
 }

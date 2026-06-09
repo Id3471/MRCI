@@ -1,43 +1,73 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../core/models/user.model';
+import { CreateUserDto, User } from '../../core/models/user.model';
 import { UserService } from '../../core/services/user/user.service';
 import { ProfilService } from '../../core/services/profil/profil.service';
 import { ResidenceService } from '../../core/services/residence/residence.service';
 import { Profil } from '../../core/models/profil.model';
 import { Residence } from '../../core/models/residence.model';
+import { API_CONFIG } from '../../core/config/api.config';
+import { CrudColumn } from '../../core/models/crud.model';
+import { ConfirmModal } from "../../Component/shared/confirm-modal/confirm-modal";
+import { GenericModal } from "../../Component/shared/generic-modal/generic-modal";
+import { Create } from "../../Component/commodite/create/create";
+import { CreateUser } from "../../Component/user/create-user/create-user";
+import { UpdateUser, UserEditPayload } from "../../Component/user/update-user/update-user";
+import { CrudPage } from "../../Component/shared/crud-page/crud-page";
 
 @Component({
   selector: 'app-user',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmModal, GenericModal, CreateUser, UpdateUser, CrudPage],
   templateUrl: './user.html',
   styleUrl: './user.css',
 })
 export class UserPage {
+  // Listes de données
   users: User[] = [];
+  allUsers: User[] = [];
+  displayedUsers: User[] = [];
   profils: Profil[] = [];
   residences: Residence[] = [];
-  error: string | null = null;
-  loading = false;
+  usertoedit!: User;
 
-  showCreate = false;
-  createName = '';
-  createEmail = '';
-  createProfilId: number | null = null;
-  createResidenceId: number | null = null;
+  // États de recherche & pagination
+  searchTerm = '';
+  page = 1;
+  perPage = 5;
+  total = 0;
+  lastPage = 1;
 
-  showEdit = false;
-  editTarget: User | null = null;
-  editName = '';
-  editEmail = '';
-  editProfilId: number | null = null;
-  editResidenceId: number | null = null;
+  // États des modaux & loaders
+  createOpen = false;
+  editOpen = false;
+  confirmOpen = false;
+  isCreating = false;
+  isAssigning = false;
+  
+  selectedProfilId: number | null = null;
+  editTargetId = 0;
+  editFormData: Partial<CreateUserDto> | null = null;
 
-  showConfirm = false;
-  confirmAction: (() => void) | null = null;
+  // Gestion des messages de notification
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+
+  // Configuration dynamique du modal de confirmation
+  confirmtitre = '';
   confirmMessage = '';
+  confirmButtonLabel = 'Confirmer';
+  confirmColorClass = 'bg-red-600 hover:bg-red-500';
+  confirmAction: (() => void) | null = null;
+
+  // Colonnes de la table de CRUD
+  readonly tableColumns: CrudColumn[] = [
+    { key: 'name', label: 'Nom & Prénoms', type: 'text' },
+    { key: 'email', label: 'Email', type: 'text' },
+    { key: 'profilLabel', label: 'Profil', type: 'text' },
+    { key: 'statut', label: 'Statut', type: 'boolean', trueLabel: 'Actif', falseLabel: 'Inactif' },
+  ];
 
   constructor(
     private userService: UserService,
@@ -47,144 +77,260 @@ export class UserPage {
   ) {}
 
   ngOnInit() {
-    this.loadAll();
-    this.loadRefs();
+    this.loadUsers();
+    this.loadInitialData();
   }
 
-  loadAll() {
-    this.loading = true;
-    this.error = null;
+  /**
+   * Chargement des listes nécessaires aux formulaires (Profils & Résidences)
+   */
+  loadInitialData() {
+    this.profilService.getAllProfils().subscribe({
+      next: (res: any) => {
+        this.profils = res?.result || [];
+        this.cd.detectChanges();
+      },
+    });
+
+    this.residenceService.getAbsAllResidences().subscribe({
+      next: (res: any) => {
+        this.residences = res?.result || [];
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  /**
+   * Chargement principal des utilisateurs (Paginé ou filtré)
+   */
+  loadUsers() {
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    const term = this.searchTerm.trim();
+    if (term) {
+      return this.loadSearchUsers(term);
+    }
+
+    this.userService.getNbUsers(this.perPage, this.page).subscribe({
+      next: (res: any) => {
+        const result = res?.result;
+        const meta = res?.meta;
+        const rawUsers = Array.isArray(result) ? result : result ? [result] : [];
+        
+        // Extraction du libellé du profil pour l'affichage à plat dans le tableau
+        this.users = rawUsers.map((u: any) => ({
+          ...u,
+          profilLabel: u.profil?.libelle ?? 'Inconnue'
+        }));
+
+        this.displayedUsers = this.users;
+        this.allUsers = [];
+
+        if (meta) {
+          this.total = meta.total ?? 0;
+          this.lastPage = meta.last_page ?? meta.lastPage ?? 1;
+        } else {
+          this.total = this.users.length;
+          this.lastPage = 1;
+        }
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? err?.message ?? 'Impossible de charger les utilisateurs.';
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  /**
+   * Recherche locale/globale des utilisateurs
+   */
+  loadSearchUsers(term: string) {
+    this.errorMessage = null;
+
+    const filterResults = (items: User[]) => {
+      const search = term.toLowerCase();
+      this.displayedUsers = items.filter((u) =>
+        [u.name, u.email].filter(Boolean).some((val) => val.toLowerCase().includes(search))
+      );
+      this.total = this.displayedUsers.length;
+      this.lastPage = 1;
+      this.page = 1;
+      this.cd.detectChanges();
+    };
+
+    if (this.allUsers.length) {
+      return filterResults(this.allUsers);
+    }
+
     this.userService.getAllUsers().subscribe({
       next: (res: any) => {
-        this.users = res.users ?? res.result ?? [];
-        this.loading = false;
-        this.cd.detectChanges();
+        const result = res?.result;
+        const rawUsers = Array.isArray(result) ? result : result ? [result] : [];
+        
+        this.allUsers = rawUsers.map((u: any) => ({
+          ...u,
+          profilLabel: u.profil?.libelle ?? 'Inconnue'
+        }));
+
+        filterResults(this.allUsers);
       },
       error: (err) => {
-        this.error = err?.error?.message ?? 'Impossible de charger les utilisateurs.';
-        this.loading = false;
+        this.errorMessage = err?.error?.message ?? 'Erreur lors de la recherche.';
         this.cd.detectChanges();
       },
     });
   }
 
-  loadRefs() {
-    this.profilService.getAllProfils().subscribe({
-      next: (res: any) => (this.profils = res.profils ?? res.result ?? []),
-      error: () => {},
-    });
-    this.residenceService.getAllResidences().subscribe({
-      next: (res: any) => (this.residences = res.result ?? res.residences ?? []),
-      error: () => {},
-    });
-  }
-
-  openCreate() {
-    this.createName = '';
-    this.createEmail = '';
-    this.createProfilId = this.profils?.[0]?.id ?? null;
-    this.createResidenceId = this.residences?.[0]?.id ?? null;
-    this.showCreate = true;
-  }
-  submitCreate() {
-    if (!this.createName.trim() || !this.createEmail.trim()) {
-      this.error = 'Nom et email requis.';
+  onSearchChange(value: string) {
+    this.searchTerm = value;
+    if (this.searchTerm.trim()) {
+      this.loadSearchUsers(this.searchTerm.trim());
       return;
     }
-    this.loading = true;
-    this.userService
-      .createUser({
-        name: this.createName.trim(),
-        email: this.createEmail.trim(),
-        residence_id: this.createResidenceId ?? undefined,
-        profil_id: this.createProfilId ?? undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.showCreate = false;
-          this.loadAll();
-        },
-        error: (err) => {
-          this.error = err?.error?.message ?? 'Erreur lors de la création.';
-          this.loading = false;
-        },
-      });
+    this.page = 1;
+    this.loadUsers();
   }
 
+  onPerPageChange(value: number) {
+    this.perPage = value;
+    this.page = 1;
+    this.loadUsers();
+  }
+
+  onPageChange(newPage: number) {
+    this.page = newPage;
+    this.loadUsers();
+  }
+
+  // --- Gestion Création ---
+  openCreate() { this.createOpen = true; }
+  closeCreate() { this.createOpen = false; }
+
+  onCreateSubmit(dto: CreateUserDto) {
+    if (this.isCreating) return;
+    this.isCreating = true;
+
+    this.userService.createUser(dto).subscribe({
+      next: () => {
+        this.successMessage = 'Utilisateur créé avec succès.';
+        this.createOpen = false;
+        this.isCreating = false;
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.isCreating = false;
+        this.errorMessage = err?.error?.message ?? "Erreur lors de la création.";
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  // --- Gestion Modification ---
   openEdit(u: User) {
-    this.editTarget = u;
-    this.editName = u.name;
-    this.editEmail = u.email;
-    this.editProfilId = u.profil?.id ?? null;
-    this.editResidenceId = u.residence_id ?? null;
-    this.showEdit = true;
+    this.usertoedit = u;
+    this.editTargetId = Number(u.id);
+
+    // Initialisation du formulaire enfant via l'input initialValue
+    this.editFormData = {
+      nom: u.name,
+      email: u.email,
+      residenceId: u.residence_id
+    };
+    this.editOpen = true;
   }
-  submitEdit() {
-    if (!this.editTarget) return;
-    if (!this.editName.trim() || !this.editEmail.trim()) {
-      this.error = 'Nom et email requis.';
+
+  closeEdit() {
+    this.editOpen = false;
+    this.editFormData = null;
+  }
+
+  onEditSubmit(payload: UserEditPayload) {
+    this.userService.updateUser(payload.id, payload.data).subscribe({
+      next: () => {
+        this.successMessage = 'Utilisateur mis à jour avec succès.';
+        this.editOpen = false;
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? 'Erreur lors de la modification.';
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  // --- Actions de validation & Statuts ---
+  openConfirmToggle(u: User) {
+    const isActive = u.statut;
+    this.confirmtitre = isActive ? "Désactiver l'utilisateur" : "Activer l'utilisateur";
+    this.confirmMessage = `Voulez-vous vraiment ${isActive ? 'désactiver' : 'activer'} l'utilisateur "${u.name}" ?`;
+    this.confirmButtonLabel = isActive ? 'Désactiver' : 'Activer';
+    this.confirmColorClass = isActive ? 'bg-red-600 hover:bg-red-500' : 'bg-green-600 hover:bg-green-500';
+    this.confirmAction = () => this.performToggleStatut(u);
+    this.confirmOpen = true;
+  }
+
+  performToggleStatut(u: User) {
+    this.confirmOpen = false;
+    const request = u.statut ? this.userService.deactivateUser(u.id) : this.userService.activateUser(u.id);
+    
+    request.subscribe({
+      next: () => this.loadUsers(),
+      error: (err) => { this.errorMessage = err?.error?.message ?? 'Changement de statut impossible.'; }
+    });
+  }
+
+  openConfirmDelete(u: User) {
+    this.confirmtitre = "Supprimer l'utilisateur";
+    this.confirmMessage = `Voulez-vous vraiment supprimer définitivement l'utilisateur "${u.name}" ?`;
+    this.confirmButtonLabel = 'Supprimer';
+    this.confirmColorClass = 'bg-red-600 hover:bg-red-500';
+    this.confirmAction = () => this.performDeleteUser(u.id);
+    this.confirmOpen = true;
+  }
+
+  performDeleteUser(id: number) {
+    this.confirmOpen = false;
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.successMessage = 'Utilisateur supprimé avec succès.';
+        this.loadUsers();
+      },
+      error: (err) => { this.errorMessage = err?.error?.message ?? 'Suppression impossible.'; }
+    });
+  }
+
+  cancelConfirm() {
+    this.confirmOpen = false;
+    this.confirmAction = null;
+  }
+
+  /**
+   * Traitement par lot : Assigne le profil sélectionné à tous les utilisateurs actuellement visibles
+   */
+  onAssignProfile() {
+    if (!this.selectedProfilId || this.isAssigning) return;
+
+    const userIds = this.displayedUsers.map(u => u.id);
+    if (userIds.length === 0) {
+      this.errorMessage = "Aucun utilisateur présent dans la liste pour appliquer l'attribution.";
       return;
     }
-    this.loading = true;
-    this.userService
-      .updateUser(this.editTarget.id, {
-        name: this.editName.trim(),
-        email: this.editEmail.trim(),
-        residence_id: this.editResidenceId ?? undefined,
-        profil_id: this.editProfilId ?? undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.showEdit = false;
-          this.editTarget = null;
-          this.loadAll();
-        },
-        error: (err) => {
-          this.error = err?.error?.message ?? 'Erreur lors de la modification.';
-          this.loading = false;
-        },
-      });
-  }
 
-  confirmToggle(u: User) {
-    this.confirmMessage = u.statut ? `Désactiver "${u.name}" ?` : `Activer "${u.name}" ?`;
-    this.confirmAction = () => this.toggleStatut(u);
-    this.showConfirm = true;
-  }
-  toggleStatut(u: User) {
-    this.showConfirm = false;
-    this.loading = true;
-    const obs = u.statut
-      ? this.userService.deactivateUser(u.id)
-      : this.userService.activateUser(u.id);
-    obs.subscribe({
-      next: () => this.loadAll(),
-      error: (err) => {
-        this.error = err?.error?.message ?? 'Action impossible.';
-        this.loading = false;
+    this.isAssigning = true;
+    this.userService.assignProfileToUsers(this.selectedProfilId, userIds).subscribe({
+      next: () => {
+        this.successMessage = 'Profil appliqué avec succès à la sélection.';
+        this.selectedProfilId = null;
+        this.isAssigning = false;
+        this.loadUsers();
       },
-    });
-  }
-
-  confirmDelete(u: User) {
-    this.confirmMessage = `Supprimer "${u.name}" ?`;
-    this.confirmAction = () => this.deleteUser(u.id);
-    this.showConfirm = true;
-  }
-  deleteUser(id: number) {
-    this.showConfirm = false;
-    this.loading = true;
-    this.userService.deleteUser(id).subscribe({
-      next: () => this.loadAll(),
       error: (err) => {
-        this.error = err?.error?.message ?? 'Suppression impossible.';
-        this.loading = false;
-      },
+        this.isAssigning = false;
+        this.errorMessage = err?.error?.message ?? "Erreur lors de l'attribution groupée.";
+        this.cd.detectChanges();
+      }
     });
-  }
-
-  closeConfirm() {
-    this.showConfirm = false;
-    this.confirmAction = null;
   }
 }

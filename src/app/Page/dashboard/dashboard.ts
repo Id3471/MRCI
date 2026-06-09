@@ -9,11 +9,11 @@ import { DashboardAmenitiesList } from '../../Component/dashboard/dashboard-amen
 import { DashboardApartmentsTable } from '../../Component/dashboard/dashboard-apartments-table/dashboard-apartments-table';
 import { DashboardInactiveResidences } from '../../Component/dashboard/dashboard-inactive-residences/dashboard-inactive-residences';
 import { ResidenceService } from '../../core/services/residence/residence.service';
-import { ChambreService } from '../../core/services/chambre/chambre.service';
+import { AppartementService } from '../../core/services/chambre/chambre.service';
 import { CommuneService } from '../../core/services/commune/commune.service';
 import { CommoditeService } from '../../core/services/commodite/commodite.service';
 import { Residence as ApiResidence } from '../../core/models/residence.model';
-import { Chambre as ApiChambre } from '../../core/models/chambre.model';
+import { Appartement as ApiChambre } from '../../core/models/chambre.model';
 import { Commune } from '../../core/models/commune.model';
 
 
@@ -64,7 +64,7 @@ export class Dashboard implements OnInit {
 
   constructor(
     private residenceService: ResidenceService,
-    private chambreService: ChambreService,
+    private chambreService: AppartementService,
     private communeService: CommuneService,
     private commoditeService: CommoditeService,
     private cd: ChangeDetectorRef
@@ -74,14 +74,14 @@ export class Dashboard implements OnInit {
   ngOnInit() {
     forkJoin({
       residenceResponse: this.residenceService.getAbsAllResidences(),
-      chambreResponse: this.chambreService.getAllChambres(),
+      chambreResponse: this.chambreService.getAll(),
       communeResponse: this.communeService.getAllCommunes(),
       commoditeResponse: this.commoditeService.getAllCommodites(),
     }).subscribe({
       next: ({ residenceResponse, chambreResponse, communeResponse, commoditeResponse }) => {
         this.communes = communeResponse.result ?? [];
 
-        this.commoditeById = (commoditeResponse.commodites ?? []).reduce(
+        this.commoditeById = (commoditeResponse.result ?? []).reduce(
           (map: Record<number, string>, c: any) => {
             if (c?.id != null) {
               map[Number(c.id)] = String(c.libelle ?? c.nom ?? c.label ?? `Commodité #${c.id}`);
@@ -94,7 +94,7 @@ export class Dashboard implements OnInit {
         this.communeById = this.communes.reduce((map, commune) => {
 
           if (commune.id != null) {
-            map[commune.id] = commune.nom ?? commune.libelle ?? map[commune.id] ?? 'Inconnue';
+            map[commune.id] = commune.nom ?? map[commune.id] ?? 'Inconnue';
           }
           return map;
         }, {} as Record<number, string>);
@@ -251,35 +251,31 @@ export class Dashboard implements OnInit {
     }));
   }
 
-  private mapChambres(result: unknown): DashboardApartment[] {
+private mapChambres(result: unknown): DashboardApartment[] {
     const chambres = this.extractChambreList(result);
     return chambres.map((chambre) => ({
       id: chambre.id,
-      type:
-        typeof chambre.type === 'string'
-          ? chambre.type
-          : chambre.type?.type ?? 'Autre',
-      residence:
-        chambre.residence?.nom ??
-        (chambre.residence as any)?.code ??
-        `Résidence #${chambre.residence?.id ?? 'inconnue'}`,
-      quartier:
-        (chambre.quartier as any)?.libelle ??
-        chambre.quartier?.nom ??
-        'Inconnu',
-      commune: this.resolveChambreCommuneName(chambre),
+      // Le type n'est plus un objet, c'est juste type_id. Si vous n'avez pas de dictionnaire, on affiche l'ID
+      type: `Type #${chambre.type_id ?? 'Inconnu'}`, 
+      
+      // La résidence n'est plus un objet, on utilise le tableau des résidences déjà mappées pour retrouver le nom
+      residence: this.residences.find(r => r.id === chambre.residence_id)?.name ?? `Résidence #${chambre.residence_id ?? 'Inconnue'}`,
+      
+      // Le quartier n'est plus un objet.
+      quartier: `Quartier #${chambre.quartier_id ?? 'Inconnu'}`,
+      
+      // La commune est résolue via son ID en utilisant le dictionnaire
+      commune: this.communeById[chambre.commune_id] ?? 'Inconnue',
+      
       price: Number(chambre.prix) || 0,
       status: chambre.statut ? 'Actif' : 'Inactif',
-      createdAt:
-        (chambre as any).created_at ??
-        (chambre as any).createdAt ??
-        new Date().toISOString(),
+      createdAt: chambre.created_at ?? new Date().toISOString(),
+      
       amenities: Array.isArray(chambre.commodites)
         ? chambre.commodites
-            .map((amenity) => this.getAmenityLabel(amenity))
-            .filter((value): value is string => value.length > 0)
+            .map((amenity: unknown) => this.getAmenityLabel(amenity))
+            .filter((value: string): value is string => value.length > 0)
         : [],
-
     }));
   }
 
@@ -315,46 +311,6 @@ export class Dashboard implements OnInit {
     return [result as ApiChambre];
   }
 
-  private resolveChambreCommuneName(chambre: ApiChambre): string {
-    const commune = chambre.commune as any;
-    if (commune) {
-      if (typeof commune === 'string') {
-        return commune;
-      }
-      if (commune.libelle) {
-        return commune.libelle;
-      }
-      if (commune.nom) {
-        return commune.nom;
-      }
-    }
-
-    const residenceCommune = (chambre.residence as any)?.commune;
-    if (residenceCommune) {
-      if (typeof residenceCommune === 'string') {
-        return residenceCommune;
-      }
-      return residenceCommune.libelle ?? residenceCommune.nom ?? undefined;
-    }
-
-    const communeId = (chambre as any).commune_id ?? (chambre.residence as any)?.commune_id;
-    if (communeId != null) {
-      const name = this.communeById[communeId];
-      if (name) {
-        return name;
-      }
-    }
-
-    const residenceId = chambre.residence?.id;
-    if (residenceId != null) {
-      const residence = this.residences.find((res) => res.id === residenceId);
-      if (residence?.commune) {
-        return residence.commune;
-      }
-    }
-
-    return 'Inconnue';
-  }
 
   private getAmenityLabel(amenity: unknown): string {
     if (!amenity) {

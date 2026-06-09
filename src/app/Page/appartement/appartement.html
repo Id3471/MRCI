@@ -1,0 +1,22 @@
+<app-crud-page titre="Appartements" searchPlaceholder="Rechercher par code ou description..."
+    [data]="displayedAppartements" [columns]="tableColumns"
+    [actionsConfig]="{ canEdit: true, canDelete: true, canToggle: true, toggleKey: 'statut' }" [page]="page"
+    [perPage]="perPage" [total]="total" [lastPage]="lastPage" [errorMessage]="errorMessage"
+    [successMessage]="successMessage" (searchChange)="onSearchChange($event)" (perPageChange)="onPerPageChange($event)"
+    (pageChange)="onPageChange($event)" (addClick)="openCreate()" (deleteClick)="openConfirmDelete($event)"
+    (toggleClick)="openConfirmToggle($event)">
+</app-crud-page>
+
+<!-- Modale d'ajout (Large Modal) -->
+<app-generic-modal [open]="createOpen" titre="Ajouter un appartement" (close)="closeCreate()" maxWidthClass="max-w-4xl">
+    <app-create-apt [loading]="isCreating" [types]="typesList" [residences]="residencesList" [communes]="communesList"
+        [quartiers]="quartiersList" [commodites]="commoditesList" (create)="onCreateSubmit($event)"
+        (cancel)="closeCreate()" />
+</app-generic-modal>
+
+
+<!-- Confirm Modal (Delete/Toggle) -->
+<app-confirm-modal [open]="confirmOpen" [titre]="confirmtitre" [message]="confirmMessage"
+    [confirmButtonLabel]="confirmButtonLabel" [confirmColorClass]="confirmColorClass" (confirm)="confirmAction?.()"
+    (cancel)="cancelConfirm()">
+</app-confirm-modal>

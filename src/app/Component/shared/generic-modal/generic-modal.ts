@@ -2,18 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-modal-shell',
+  selector: 'app-generic-modal',
   imports: [CommonModule],
-  templateUrl: './modal-shell.html',
-  styleUrl: './modal-shell.css',
+  templateUrl: './generic-modal.html',
+  styleUrl: './generic-modal.css',
 })
-export class ModalShell {
+export class GenericModal {
   @Input() open = false;
-  @Input() title = '';
-
+  @Input() titre = 'Modale';
+  @Input() maxWidthClass = 'max-w-2xl';
   @Output() close = new EventEmitter<void>();
-
-  onClose() {
-    this.close.emit();
-  }
 }

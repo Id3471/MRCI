@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ResidenceService } from './residence.service';
-import { API_CONFIG } from '../config/api.config';
+import { API_CONFIG } from '../../config/api.config';
 
 describe('ResidenceService', () => {
   let service: ResidenceService;

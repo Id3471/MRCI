@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ModalShell } from './modal-shell';
+import { CreateProfil } from './create-profil';
 
-describe('ModalShell', () => {
-  let component: ModalShell;
-  let fixture: ComponentFixture<ModalShell>;
+describe('CreateProfil', () => {
+  let component: CreateProfil;
+  let fixture: ComponentFixture<CreateProfil>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ModalShell],
+      imports: [CreateProfil],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ModalShell);
+    fixture = TestBed.createComponent(CreateProfil);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CreateCommuneDTO } from '../../../core/models/commune.model';
+import { CreateCommuneDto } from '../../../core/models/commune.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,16 +10,22 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './commune-create-modal.css',
 })
 export class CommuneCreateModal {
-  @Input() open = false;
   @Input() loading = false;
-  @Output() close = new EventEmitter<void>();
-  @Output() create = new EventEmitter<CreateCommuneDTO>();
+  @Output() cancel = new EventEmitter<void>();
+  @Output() create = new EventEmitter<CreateCommuneDto>();
 
-  formValue: CreateCommuneDTO = {
-    libelle: ''
+  formValue: CreateCommuneDto = {
+    nom: '',
+  };
+  formSubmitting = false;
+
+  resetForm() {
+    this.formValue = { nom: '' };
+    this.formSubmitting = false;
   }
-    formSubmitting = false;
-    onSubmit() {
+
+  onSubmit() {
+    if (!this.formValue.nom) return;
     this.formSubmitting = true;
     this.create.emit(this.formValue);
   }

@@ -1,90 +1,38 @@
-<div class="p-4">
-  <h3 class="text-md font-bold mb-4">Quartiers</h3>
+<app-crud-page
+  titre="Liste des quartiers par commune"
+  searchPlaceholder="Rechercher par nom de quartier ou de commune..."
+  [data]="displayedQuartiers"
+  [columns]="tableColumns"
+  [actionsConfig]="{ canEdit: true, canDelete: true, canToggle: false }"
+  [page]="page"
+  [perPage]="perPage"
+  [total]="total"
+  [lastPage]="lastPage"
+  [errorMessage]="errorMessage"
+  [successMessage]="successMessage"
+  
+  (searchChange)="onSearchChange($event)"
+  (perPageChange)="onPerPageChange($event)"
+  (pageChange)="onPageChange($event)"
+  (addClick)="openCreate()"
+  (editClick)="openEdit($event)"
+  (deleteClick)="openConfirmDelete($event)">
+</app-crud-page>
 
-  <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
+<app-generic-modal [open]="createOpen" titre="Ajouter un quartier" (close)="closeCreate()" maxWidthClass="max-w-md">
+  <app-create-quartier [loading]="isCreating" [communes]="communesList" (create)="onCreateSubmit($event)" (cancel)="closeCreate()" />
+</app-generic-modal>
 
-  <div class="p-4">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-md font-bold">Quartiers</h3>
-      <button class="bg-primary text-white px-4 py-2 rounded" (click)="openCreate()">Ajouter</button>
-    </div>
+<app-generic-modal [open]="editOpen" titre="Modification du quartier" (close)="closeEdit()" maxWidthClass="max-w-md">
+  <app-update-quartier [targetId]="editTargetId" [communes]="communesList" [initialValue]="editFormData" [quartier]="itemToEdit" (OnSubmit)="onEditSubmit($event)" (cancel)="closeEdit()" />
+</app-generic-modal>
 
-    <div *ngIf="error" class="text-red-600 mb-4">{{ error }}</div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left">
-        <thead class="text-xs uppercase bg-primary-light">
-          <tr>
-            <th class="px-6 py-3">Nom</th>
-            <th class="px-6 py-3">Commune</th>
-            <th class="px-6 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let q of quartiers" class="bg-white border-b">
-            <td class="px-6 py-4 font-medium text-gray-900">{{ q.nom }}</td>
-            <td class="px-6 py-4">{{ q.commune?.nom ?? '-' }}</td>
-            <td class="px-6 py-4 text-right">
-              <button class="me-2" (click)="openEdit(q)">Modifier</button>
-              <button class="text-red-600" (click)="confirmDelete(q)">Supprimer</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Create Modal -->
-    <div *ngIf="showCreate" class="modal-overlay">
-      <div class="modal">
-        <h4>Ajouter un quartier</h4>
-        <div class="mt-2">
-          <label>Nom</label>
-          <input class="w-full p-2 border rounded" [(ngModel)]="createNom" />
-        </div>
-        <div class="mt-2">
-          <label>Commune</label>
-          <select class="w-full p-2 border rounded" [(ngModel)]="createCommuneId">
-            <option *ngFor="let c of communes" [ngValue]="c.id">{{ c.nom }}</option>
-          </select>
-        </div>
-        <div class="mt-4 flex justify-end">
-          <button class="me-2" (click)="showCreate=false">Annuler</button>
-          <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitCreate()">Enregistrer</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div *ngIf="showEdit" class="modal-overlay">
-      <div class="modal">
-        <h4>Modifier le quartier</h4>
-        <div class="mt-2">
-          <label>Nom</label>
-          <input class="w-full p-2 border rounded" [(ngModel)]="editNom" />
-        </div>
-        <div class="mt-2">
-          <label>Commune</label>
-          <select class="w-full p-2 border rounded" [(ngModel)]="editCommuneId">
-            <option *ngFor="let c of communes" [ngValue]="c.id">{{ c.nom }}</option>
-          </select>
-        </div>
-        <div class="mt-4 flex justify-end">
-          <button class="me-2" (click)="showEdit=false">Annuler</button>
-          <button class="bg-primary text-white px-3 py-1 rounded" (click)="submitEdit()">Modifier</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Confirm Modal -->
-    <div *ngIf="showConfirm" class="modal-overlay">
-      <div class="modal">
-        <h4>Confirmation</h4>
-        <p class="mt-2">{{ confirmMessage }}</p>
-        <div class="mt-4 flex justify-end">
-          <button class="me-2" (click)="closeConfirm()">Annuler</button>
-          <button class="bg-red-600 text-white px-3 py-1 rounded" (click)="confirmAction && confirmAction()">Confirmer</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<app-confirm-modal
+  [open]="confirmOpen"
+  [titre]="confirmtitre"
+  [message]="confirmMessage"
+  [confirmButtonLabel]="confirmButtonLabel"
+  [confirmColorClass]="confirmColorClass"
+  (confirm)="confirmAction?.()"
+  (cancel)="cancelConfirm()">
+</app-confirm-modal>

@@ -8,12 +8,14 @@ import { ProfilPage } from './Page/profil/profil';
 import { QuartierPage } from './Page/quartier/quartier';
 import { TypeAppartementPage } from './Page/type-appartement/type-appartement';
 import { UserPage } from './Page/user/user';
+import { Appartements } from './Page/appartement/appartement';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard },
   { path: 'residences', component: Residence },
   { path: 'cartographie', component: Cartographie },
+  {path: 'appartements', component: Appartements},
   { path: 'parametrage/commodites', component: CommoditePage },
   { path: 'parametrage/communes', component: CommunePage },
   { path: 'administration/profils', component: ProfilPage },

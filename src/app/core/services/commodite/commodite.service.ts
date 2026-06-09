@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
-import { Commodite, CommoditeResponse } from '../../models/commodite.model';
+import { CommoditeResponse, CreateCommoditeDto } from '../../models/commodite.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,29 +16,36 @@ export class CommoditeService {
     return this.http.get<CommoditeResponse>(`${this.apiUrl}/list`);
   }
 
-  // utile si besoin plus tard
-  getCommoditeById(id: number): Observable<{ success: boolean; detail?: Commodite }> {
-    return this.http.get<{ success: boolean; detail?: Commodite }>(`${this.apiUrl}/${id}`);
+  getPaginatedCommodites(limit: number, page: number): Observable<CommoditeResponse> {
+    return this.http.get<CommoditeResponse>(`${this.apiUrl}/list/paginated`, {
+      params: {
+        limit: String(Math.trunc(limit)),
+        page: String(Math.trunc(page)),
+      },
+    });
   }
 
-  createCommodite(data: Partial<Commodite>) {
-    return this.http.post<CommoditeResponse>(`${this.apiUrl}`, data);
+  getCommoditeById(id: number): Observable<CommoditeResponse> {
+    return this.http.get<CommoditeResponse>(`${this.apiUrl}/${id}`);
   }
 
-  updateCommodite(id: number, data: Partial<Commodite>) {
-    return this.http.put<CommoditeResponse>(`${this.apiUrl}/${id}`, data);
+  createCommodite(data: CreateCommoditeDto): Observable<CommoditeResponse> {
+    return this.http.post<CommoditeResponse>(`${this.apiUrl}/create`, data);
   }
 
-  activateCommodite(id: number) {
-    return this.http.post<CommoditeResponse>(`${this.apiUrl}/active/${id}`, {});
+  activateCommodite(id: number): Observable<CommoditeResponse> {
+    return this.http.patch<CommoditeResponse>(`${this.apiUrl}/active/${id}`, {});
   }
 
-  deactivateCommodite(id: number) {
-    return this.http.post<CommoditeResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  deactivateCommodite(id: number): Observable<CommoditeResponse> {
+    return this.http.patch<CommoditeResponse>(`${this.apiUrl}/desactive/${id}`, {});
   }
 
-  deleteCommodite(id: number) {
-    return this.http.delete<CommoditeResponse>(`${this.apiUrl}/${id}`);
+  deleteCommodite(id: number): Observable<CommoditeResponse> {
+    return this.http.delete<CommoditeResponse>(`${this.apiUrl}/delete/${id}`);
+  }
+
+  updateCommodite(id: number, data: Partial<CreateCommoditeDto>): Observable<CommoditeResponse> {
+    return this.http.post<CommoditeResponse>(`${this.apiUrl}/update/${id}`, data);
   }
 }
-

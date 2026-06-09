@@ -3,6 +3,7 @@ declare const L: any;
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Residence } from '../../core/models/residence.model';
+import { Appartement } from '../../core/models/chambre.model';
 
 @Component({
   selector: 'app-cartographie-map',
@@ -11,8 +12,8 @@ import { Residence } from '../../core/models/residence.model';
   styleUrl: './cartographie-map.component.css',
 })
 export class CartographieMapComponent implements AfterViewInit, OnChanges {
-  @Input() residences: Residence[] = [];
-  @Output() selectedResidence = new EventEmitter<Residence>();
+  @Input() appartements: Appartement[] = [];
+  @Output() selectedAppartement = new EventEmitter<Appartement>();
 
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
   map: any;
@@ -24,7 +25,7 @@ export class CartographieMapComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.map && changes['residences']) {
+    if (this.map && changes['appartements']) {
       this.renderMarkers();
     }
   }
@@ -62,17 +63,17 @@ export class CartographieMapComponent implements AfterViewInit, OnChanges {
   private renderMarkers() {
     this.markerLayer.clearLayers();
 
-    const markers = this.residences
-      .map((residence) => {
-        const coords = this.getCoordinates(residence);
+    const markers = this.appartements
+      .map((appartement) => {
+        const coords = this.getCoordinates(appartement);
         if (!coords) {
           return null;
         }
 
         const marker = L.marker(coords).addTo(this.markerLayer);
-        marker.bindPopup(this.createPopupHtml(residence));
+        marker.bindPopup(this.createPopupHtml(appartement));
         marker.on('click', () => {
-          this.selectedResidence.emit(residence);
+          this.selectedAppartement.emit(appartement);
         });
         return marker;
       })
@@ -84,9 +85,9 @@ export class CartographieMapComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  private getCoordinates(residence: Residence): [number, number] | null {
-    const latitude = this.parseCoordinate(residence.latitude ?? (residence as any).lat);
-    const longitude = this.parseCoordinate(residence.longitude ?? (residence as any).lng ?? (residence as any).long);
+  private getCoordinates(appartement: Appartement): [number, number] | null {
+    const latitude = this.parseCoordinate(appartement.latitude);
+    const longitude = this.parseCoordinate(appartement.longitude);
 
     if (latitude == null || longitude == null) {
       return null;
@@ -103,22 +104,14 @@ export class CartographieMapComponent implements AfterViewInit, OnChanges {
     return Number.isFinite(numeric) ? numeric : null;
   }
 
-  private createPopupHtml(residence: Residence) {
-    const commune = typeof residence.commune === 'object'
-      ? residence.commune.libelle
-      : residence.commune ?? 'N/A';
-    const quartier = typeof residence.quartier === 'object'
-      ? residence.quartier.libelle
-      : residence.quartier ?? 'N/A';
-
+  private createPopupHtml(appartement: Appartement) {
     return `
       <div style="font-size:0.95rem; line-height:1.4; min-width:190px;">
-        <div style="font-weight:700; margin-bottom:.35rem;">${residence.nom ?? 'Résidence'}</div>
-        <div><strong>Commune :</strong> ${commune}</div>
-        <div><strong>Quartier :</strong> ${quartier}</div>
-        <div><strong>Contact :</strong> ${residence.contact ?? 'N/A'}</div>
-        <div><strong>Email :</strong> ${residence.email ?? 'N/A'}</div>
-        <div><strong>Statut :</strong> ${residence.statut ? 'Actif' : 'Inactif'}</div>
+        <div style="font-weight:700; margin-bottom:.35rem;">Appartement: ${appartement.code ?? 'N/A'}</div>
+        <div><strong>Prix :</strong> ${appartement.prix ? appartement.prix + ' FCFA' : 'N/A'}</div>
+        <div><strong>Pièces :</strong> ${appartement.nombre_piece ?? 'N/A'}</div>
+        <div><strong>Adresse :</strong> ${appartement.adresse ?? 'N/A'}</div>
+        <div><strong>Statut :</strong> ${appartement.statut ? 'Disponible' : 'Indisponible'}</div>
       </div>
     `;
   }

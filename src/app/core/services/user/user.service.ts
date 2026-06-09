@@ -2,37 +2,79 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_CONFIG } from '../../config/api.config';
-import { UserResponse, User } from '../../models/user.model';
+import { User, CreateUserDto, UserResponse } from '../../models/user.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private apiUrl = `${API_CONFIG.baseUrl}/users`;
+  private apiUrl = `${API_CONFIG.baseUrl}/user`;
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Récupère la liste de tous les utilisateurs
+   */
   getAllUsers(): Observable<UserResponse> {
-    return this.http.get<UserResponse>(`${this.apiUrl}`);
+    return this.http.get<UserResponse>(`${this.apiUrl}/list`);
   }
 
-  createUser(data: Partial<User>) {
-    return this.http.post<UserResponse>(`${this.apiUrl}`, data);
+
+  /**
+   * Récupère la liste paginée des utilisateurs
+   */
+  getNbUsers(limit: number, page: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${this.apiUrl}/list/paginated`, {
+      params: {
+        limit: String(limit),
+        page: String(page),
+      },
+    });
   }
 
-  updateUser(id: number, data: Partial<User>) {
-    return this.http.put<UserResponse>(`${this.apiUrl}/${id}`, data);
+  /**
+   * Ajoute un nouvel utilisateur
+   */
+  createUser(data: CreateUserDto): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/store`, data);
   }
 
-  activateUser(id: number) {
-    return this.http.post<UserResponse>(`${this.apiUrl}/active/${id}`, {});
+  /**
+   * Modifie un utilisateur
+   */
+  updateUser(id: number, data: Partial<CreateUserDto>): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.apiUrl}/update/${id}`, data);
   }
 
-  deactivateUser(id: number) {
-    return this.http.post<UserResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  /**
+   * Active un utilisateur
+   */
+  activateUser(id: number): Observable<UserResponse> {
+    return this.http.patch<UserResponse>(`${this.apiUrl}/active/${id}`, {});
   }
 
-  deleteUser(id: number) {
-    return this.http.delete<UserResponse>(`${this.apiUrl}/${id}`);
+  /**
+   * Désactive un utilisateur
+   */
+  deactivateUser(id: number): Observable<UserResponse> {
+    return this.http.patch<UserResponse>(`${this.apiUrl}/desactive/${id}`, {});
+  }
+
+  /**
+   * Supprime un utilisateur
+   */
+  deleteUser(id: number): Observable<UserResponse> {
+    return this.http.delete<UserResponse>(`${this.apiUrl}/delete/${id}`);
+  }
+
+  /**
+   * Attribue un profil à une liste d'utilisateurs (En masse)
+   * POST /user/attrib-profil
+   */
+  assignProfileToUsers(profilId: number, userIds: number[]): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/attrib-profil`, {
+      profilId,
+      userId: userIds,
+    });
   }
 }

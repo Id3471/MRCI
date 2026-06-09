@@ -1,0 +1,36 @@
+<form (ngSubmit)="OnSubmit.emit({ id: targetId, data: formValue })" #f="ngForm" class="px-6 py-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-900 mb-2">
+                Nom du profil <span class="text-red-500">*</span>
+            </label>
+            <input [(ngModel)]="formValue.profil_name" name="libelle" required
+                class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-200 focus:ring-4 focus:ring-blue-100"
+                placeholder="Ex: Administrateur..." />
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-900 mb-2">
+                Description
+            </label>
+            <input [(ngModel)]="formValue.description" name="description"
+                class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-200 focus:ring-4 focus:ring-blue-100"
+                placeholder="Courte description" />
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 mt-4">
+        <ng-content></ng-content>
+    </div>
+
+    <div class="mt-6 flex items-center justify-end gap-3">
+        <button type="button"
+            class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            (click)="cancel.emit()">
+            Annuler
+        </button>
+        <button type="submit" [disabled]="f.invalid"
+            class="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50">
+            Modifier
+        </button>
+    </div>
+</form>

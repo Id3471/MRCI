@@ -1,1 +1,4 @@
 .user-page { padding: 0.5rem; }
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}

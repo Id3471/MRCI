@@ -9,9 +9,8 @@ import { CreateResidenceDto } from '../../../core/models/residence.model';
   templateUrl: './residence-create-modal.html',
 })
 export class ResidenceCreateModalComponent {
-  @Input() open = false;
   @Input() loading = false;
-  @Output() close = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
   @Output() create = new EventEmitter<CreateResidenceDto>();
   formValue: CreateResidenceDto = {
     denomination: '',
